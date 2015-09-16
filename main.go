@@ -15,4 +15,9 @@ func main() {
 	nnSigmoid.SetConnectionWeight(0, 0, 5.0)
 	fmt.Printf("Sigmoid function: ")
 	fmt.Println(nnSigmoid.Activate([]float64{3.0, 2.0}))
+
+	nnTanhSigmoid := neural.CreateNeuralNetwork(2, 2, neural.TanhSigmoid)
+	nnTanhSigmoid.SetConnectionWeight(0, 0, 5.0)
+	fmt.Printf("Tanh Sigmoid function: ")
+	fmt.Println(nnTanhSigmoid.Activate([]float64{3.0, 2.0}))
 }
