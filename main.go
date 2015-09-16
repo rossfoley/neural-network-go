@@ -6,13 +6,8 @@ import (
 )
 
 func main() {
-	nn := neural.CreateNeuralNetwork(2, 2, func(sum float64) float64 {
-		if sum > 0 {
-			return 1.0
-		} else {
-			return 0.0
-		}
-	})
-	inputs := []float64{1.0, 2.0}
+	nn := neural.CreateNeuralNetwork(2, 2, neural.Step)
+	nn.SetConnectionWeight(0, 0, 5.0)
+	inputs := []float64{3.0, 2.0}
 	fmt.Println(nn.Activate(inputs))
 }
