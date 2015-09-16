@@ -55,5 +55,5 @@ func Step(sum float64) float64 {
 }
 
 func Sigmoid(sum float64) float64 {
-	return 1 / (1 + math.Pow(math.E, sum))
+	return 1 / (1 + math.Pow(math.E, -1.0*sum))
 }
