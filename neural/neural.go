@@ -5,49 +5,61 @@ import "math"
 /* Structs */
 
 type NeuralNetwork struct {
-	numInputs      int
-	outputs        []Node
+	layers         []Layer
 	activationFunc func(float64) float64
 }
 
-type Node struct {
-	weights []float64
+type Layer struct {
+	size    int
+	weights [][]float64
 }
 
 /* NeuralNetwork methods */
 
-func (nn NeuralNetwork) Activate(inputs []float64) []float64 {
-	var result = make([]float64, len(nn.outputs))
-	for i, v := range nn.outputs {
-		sum := v.sum(inputs)
-		result[i] = nn.activationFunc(sum)
+func (nn NeuralNetwork) Activate(inputValues []float64) []float64 {
+	var inputs = inputValues
+
+	// Loop through the weights, ignoring the first layer (input nodes)
+	for i := 1; i < len(nn.layers); i++ {
+		layer := nn.layers[i]
+		outputs := make([]float64, layer.size)
+
+		for j, weights := range layer.weights {
+			sum := 0.0
+			for k, weight := range weights {
+				sum += inputs[k] * weight
+			}
+			outputs[j] = nn.activationFunc(sum)
+		}
+
+		// The new output values become the input for the next layer
+		inputs = outputs
 	}
-	return result
+
+	// The last value for inputs is the output of the output nodes
+	return inputs
 }
 
-func (nn *NeuralNetwork) SetConnectionWeight(input int, output int, weight float64) {
-	nn.outputs[output].weights[input] = weight
+func (nn *NeuralNetwork) SetConnectionWeight(layer int, input int, node int, weight float64) {
+	nn.layers[layer].weights[node][input] = weight
 }
 
-/* Node methods */
+/* Constructor */
 
-func (n Node) sum(inputs []float64) float64 {
-	sum := 0.0
-	for i, v := range n.weights {
-		sum += inputs[i] * v
+func CreateNeuralNetwork(shape []int, activationFunc func(float64) float64) NeuralNetwork {
+	layers := make([]Layer, len(shape))
+	outputSize := shape[0]
+
+	for i, size := range shape {
+		weights := make([][]float64, size)
+		for j := range weights {
+			weights[j] = make([]float64, outputSize)
+		}
+		layers[i] = Layer{size, weights}
+		outputSize = size
 	}
-	return sum
-}
 
-/* Helper methods */
-
-func CreateNeuralNetwork(inputs int, outputs int, activationFunc func(float64) float64) NeuralNetwork {
-	var outputNodes = make([]Node, outputs)
-	for i := 0; i < outputs; i++ {
-		var weights = make([]float64, inputs)
-		outputNodes[i] = Node{weights}
-	}
-	return NeuralNetwork{inputs, outputNodes, activationFunc}
+	return NeuralNetwork{layers, activationFunc}
 }
 
 /* Activation functions */
@@ -66,4 +78,16 @@ func Sigmoid(sum float64) float64 {
 
 func TanhSigmoid(sum float64) float64 {
 	return math.Tanh(sum)
+}
+
+/* Helper functions */
+
+func max(values []int) int {
+	maxInt := 0
+	for _, v := range values {
+		if v > maxInt {
+			maxInt = v
+		}
+	}
+	return maxInt
 }
