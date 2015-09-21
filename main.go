@@ -20,4 +20,7 @@ func main() {
 	nnTanhSigmoid.SetConnectionWeight(1, 0, 0, 5.0)
 	fmt.Printf("Tanh Sigmoid function: ")
 	fmt.Println(nnTanhSigmoid.Activate([]float64{3.0, 2.0}))
+
+	fmt.Println("GraphViz output for step")
+	fmt.Println(nnStep.CreateGraph())
 }
