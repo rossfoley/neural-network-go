@@ -1,7 +1,5 @@
 package neural
 
-import "math"
-
 /* Structs */
 
 type NeuralNetwork struct {
@@ -10,38 +8,75 @@ type NeuralNetwork struct {
 }
 
 type Layer struct {
-	size    int
-	weights [][]float64
+	neurons []Neuron
+}
+
+type Neuron struct {
+	bias    float64
+	weights []float64
 }
 
 /* NeuralNetwork methods */
 
 func (nn NeuralNetwork) Activate(inputValues []float64) []float64 {
-	var inputs = inputValues
+	var outputs []float64 = inputValues
 
-	// Loop through the weights, ignoring the first layer (input nodes)
-	for i := 1; i < len(nn.layers); i++ {
-		layer := nn.layers[i]
-		outputs := make([]float64, layer.size)
-
-		for j, weights := range layer.weights {
-			sum := 0.0
-			for k, weight := range weights {
-				sum += inputs[k] * weight
-			}
-			outputs[j] = nn.activationFunc(sum)
+	for i, layer := range nn.layers {
+		// Skip the input layer
+		if i == 0 {
+			continue
 		}
 
-		// The new output values become the input for the next layer
-		inputs = outputs
+		outputs = layer.computeOutputs(outputs, nn.activationFunc)
 	}
 
 	// The last value for inputs is the output of the output nodes
-	return inputs
+	return outputs
 }
 
-func (nn *NeuralNetwork) SetConnectionWeight(layer int, input int, node int, weight float64) {
-	nn.layers[layer].weights[node][input] = weight
+func (nn *NeuralNetwork) SetConnectionWeight(layer, input, index int, weight float64) {
+	nn.layers[layer].neurons[index].weights[input] = weight
+}
+
+func (nn *NeuralNetwork) SetNeuronWeights(layer, index int, weights []float64) {
+	nn.layers[layer].neurons[index].weights = weights
+}
+
+func (nn *NeuralNetwork) SetNeuronBias(layer, index int, bias float64) {
+	nn.layers[layer].neurons[index].bias = bias
+}
+
+func (nn *NeuralNetwork) SetDefaultBias(bias float64) {
+	for i, layer := range nn.layers {
+		if i == 0 {
+			continue
+		}
+		for j := range layer.neurons {
+			nn.layers[i].neurons[j].bias = bias
+		}
+	}
+}
+
+/* Layer methods */
+
+func (l Layer) computeOutputs(inputs []float64, activate func(float64) float64) []float64 {
+	outputs := make([]float64, len(l.neurons))
+	for i, neuron := range l.neurons {
+		sum := neuron.sum(inputs)
+		outputs[i] = activate(sum)
+	}
+	return outputs
+}
+
+/* Neuron methods */
+
+func (n Neuron) sum(inputs []float64) float64 {
+	sum := 0.0
+	for i, weight := range n.weights {
+		sum += inputs[i] * weight
+	}
+	sum += n.bias
+	return sum
 }
 
 /* Constructor */
@@ -51,33 +86,16 @@ func CreateNeuralNetwork(shape []int, activationFunc func(float64) float64) Neur
 	outputSize := shape[0]
 
 	for i, size := range shape {
-		weights := make([][]float64, size)
-		for j := range weights {
-			weights[j] = make([]float64, outputSize)
+		neurons := make([]Neuron, size)
+		for j := range neurons {
+			neurons[j].weights = make([]float64, outputSize)
 		}
-		layers[i] = Layer{size, weights}
+
+		layers[i] = Layer{neurons}
 		outputSize = size
 	}
 
 	return NeuralNetwork{layers, activationFunc}
-}
-
-/* Activation functions */
-
-func Step(sum float64) float64 {
-	if sum >= 1.0 {
-		return 1.0
-	} else {
-		return 0.0
-	}
-}
-
-func Sigmoid(sum float64) float64 {
-	return 1 / (1 + math.Pow(math.E, -1.0*sum))
-}
-
-func TanhSigmoid(sum float64) float64 {
-	return math.Tanh(sum)
 }
 
 /* Helper functions */

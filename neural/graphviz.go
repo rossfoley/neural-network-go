@@ -11,13 +11,17 @@ func (nn NeuralNetwork) CreateGraph() string {
 	graph.SetName("NeuralNetwork")
 
 	for layerIndex, layer := range nn.layers {
-		for j := 0; j < layer.size; j++ {
-			name := nodeName(layerIndex, j)
-			graph.AddNode(name, name, nil)
+		for i, neuron := range layer.neurons {
+			name := nodeName(layerIndex, i)
+			attrs := make(map[string]string)
+			if neuron.bias != 0.0 {
+				attrs["label"] = label(name, neuron.bias)
+			}
+			graph.AddNode(name, name, attrs)
 		}
 
-		for b, weights := range layer.weights {
-			for a, weight := range weights {
+		for b, neuron := range layer.neurons {
+			for a, weight := range neuron.weights {
 				if weight != 0.0 {
 					attrs := make(map[string]string)
 					attrs["label"] = fmt.Sprintf("%v", weight)
@@ -33,4 +37,8 @@ func (nn NeuralNetwork) CreateGraph() string {
 
 func nodeName(layer, node int) string {
 	return fmt.Sprintf("L%vN%v", layer, node)
+}
+
+func label(name string, bias float64) string {
+	return fmt.Sprintf("\"%v, Threshold: %v\"", name, -1.0*bias)
 }

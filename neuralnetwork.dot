@@ -1,16 +1,16 @@
 digraph NeuralNetwork {
 	L0N0->L1N0[ label=1 ];
-	L0N0->L1N1[ label=0.5 ];
-	L0N1->L1N1[ label=0.5 ];
+	L0N0->L1N1[ label=1 ];
+	L0N1->L1N1[ label=1 ];
 	L0N1->L1N2[ label=1 ];
 	L1N0->L2N0[ label=1 ];
 	L1N1->L2N0[ label=-2 ];
 	L1N2->L2N0[ label=1 ];
 	L0N0;
 	L0N1;
-	L1N0;
-	L1N1;
-	L1N2;
-	L2N0;
+	L1N0 [ label="L1N0, Threshold: 1" ];
+	L1N1 [ label="L1N1, Threshold: 2" ];
+	L1N2 [ label="L1N2, Threshold: 1" ];
+	L2N0 [ label="L2N0, Threshold: 1" ];
 
 }
