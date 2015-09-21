@@ -65,7 +65,7 @@ func CreateNeuralNetwork(shape []int, activationFunc func(float64) float64) Neur
 /* Activation functions */
 
 func Step(sum float64) float64 {
-	if sum > 0 {
+	if sum >= 1.0 {
 		return 1.0
 	} else {
 		return 0.0
