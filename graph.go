@@ -2,7 +2,7 @@ package main
 
 import (
 	"./neural"
-	"fmt"
+	"io/ioutil"
 )
 
 func main() {
@@ -15,5 +15,9 @@ func main() {
 	neuralNet.SetConnectionWeight(2, 1, 0, -2.0)
 	neuralNet.SetConnectionWeight(2, 2, 0, 1.0)
 
-	fmt.Println(neuralNet.CreateGraph())
+	contents := []byte(neuralNet.CreateGraph())
+	err := ioutil.WriteFile("neuralnetwork.dot", contents, 0644)
+	if err != nil {
+		panic(err)
+	}
 }
